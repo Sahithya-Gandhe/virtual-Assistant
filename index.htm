@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Assistant</title>
+    <link rel="shortcut icon" href="logobot.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <img src="logobot.png" alt="logo" id="logo" >
+    <h1>I,m <span id="name">Wednesday</span> <span id="va">, Your Virtual Assistant</span></h1>
+
+    <button id="button" onclick="startAssistant()">Start Wednesday</button>
+    <script>
+    function speak(text) {
+        const text_speak = new SpeechSynthesisUtterance(text);
+        text_speak.rate = 1;
+        text_speak.pitch = 1;
+        text_speak.volume = 1;
+        text_speak.lang = "en-GB";
+        window.speechSynthesis.speak(text_speak);
+    }
+    
+    function wishMe() {
+        const date = new Date();
+        const hour = date.getHours();
+        
+        if (hour >= 0 && hour < 12) {
+            speak("Good morning boss! How may I help you?");
+        } else if (hour >= 12 && hour < 17) {
+            speak("Good afternoon boss! Is there any help I can do for you?");
+        } else if (hour >= 17 && 22) {
+            speak("Good evening boss! How may I help you?");
+        } else {
+            speak("Good night boss! How may I help you?");
+        }
+    }
+    
+    function takeCommand() {
+        return new Promise((resolve) => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-IN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+    
+            recognition.start();
+            console.log("Listening...");
+    
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase();
+                console.log("User said:", command);
+                resolve(command);
+                
+            };
+    
+            recognition.onerror = (event) => {
+                console.log("Error occurred in recognition:", event.error);
+                resolve("none");
+            };
+        });
+    }
+    
+    function processCommand(command) {
+        if (command.includes('time')) {
+            const date = new Date();
+            let hour = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            
+            hour = hour % 12 || 12;
+            speak(`The time is ${hour} ${minutes} ${ampm}`);
+            return true;
+        }
+        else if (command.includes('open youtube')) {
+            speak("opening youtube...");
+            window.open('https://youtube.com', '_blank');
+            return true;
+        }
+        else if (command.includes('open spotify')) {
+            speak("opening spotify...")
+            window.open('https://spotify.com', '_blank');
+            return true;
+        }
+        else if (command.includes('open google')) {
+            speak("opening google...")
+            window.open('https://google.com', '_blank');
+            return true;
+        }
+        else if (command.includes('hello')) {
+            speak("Hello boss! Have a good day");
+            return true;
+        }
+        else if(command.includes("open calculator")){
+            speak("opening Calculator...")
+            window.open("calculator://")
+        }
+        else {
+            speak("Sorry boss! I'm unable to answer your query");
+            return false;
+        }
+    }
+    
+    async function startAssistant() {
+        speak("Hi, I am Wednesday!");
+        wishMe();
+        
+        let running = true;
+        while (running) {
+            try {
+                const command = await takeCommand();
+                running = processCommand(command);
+            } catch (error) {
+                console.error("Error:", error);
+                running = false;
+            }
+        }
+    }
+</script>
+
+    
+</body>
+</html>
